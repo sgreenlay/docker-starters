@@ -1,0 +1,9 @@
+[package]
+name = "app"
+version = "0.0.0"
+authors = [""]
+edition = "2018"
+
+[dependencies]
+actix-web = "2.0"
+actix-rt = "1.0"
