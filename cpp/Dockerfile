@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:buster-slim as builder
 RUN apt-get update -y && \
     apt-get install -y clang git curl unzip tar make
 
@@ -23,5 +23,10 @@ RUN ["cmake", "-DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake", 
 RUN sed -i 's/-lzstd//g' build.ninja
 RUN ["ninja"]
 
+FROM debian:buster-slim
+RUN apt-get update -y && \
+    apt-get install -y libatomic1
+COPY --from=builder /app/build/app /app/
+WORKDIR /app
 EXPOSE 80
 CMD ["./app"]
