@@ -5,23 +5,25 @@ RUN apt-get update -y && \
 RUN ["git", "clone", "https://github.com/Microsoft/vcpkg.git", "/vcpkg"]
 
 WORKDIR /vcpkg
-RUN "./bootstrap-vcpkg.sh"
-RUN ["./vcpkg", "integrate", "install"]
+RUN ./bootstrap-vcpkg.sh
+RUN ./vcpkg integrate install
 
-ENV PATH="/vcpkg/downloads/tools/cmake-3.17.2-linux/cmake-3.17.2-Linux-x86_64/bin/:${PATH}"
-ENV PATH="/vcpkg/downloads/tools/ninja-1.10.0-linux/:${PATH}"
+RUN apt-get install -y python3 gperf pkg-config zip unzip
 
-RUN apt-get install -y python3 gperf
-RUN ["/vcpkg/vcpkg", "install", "proxygen"]
+RUN mkdir /app
+WORKDIR /app
 
-RUN mkdir /app 
-ADD . /app/
+ENV VCPKG_FEATURE_FLAGS="manifests,versions"
+
+COPY ./vcpkg.json  .
+RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ /vcpkg/vcpkg install
+
+ADD . .
 
 RUN mkdir /app/build
 WORKDIR /app/build
-RUN ["cmake", "-DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake", "-DCMAKE_BUILD_TYPE=Release", "-GNinja", ".."]
-RUN sed -i 's/-lzstd//g' build.ninja
-RUN ["ninja"]
+RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ `/vcpkg/vcpkg fetch cmake` -DCMAKE_MAKE_PROGRAM=`/vcpkg/vcpkg fetch ninja` -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..
+RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ `/vcpkg/vcpkg fetch ninja`
 
 FROM debian:buster-slim
 RUN apt-get update -y && \

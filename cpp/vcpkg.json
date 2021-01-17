@@ -1,0 +1,9 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name": "cpp-docker-starter",
+    "version-string": "0.0.0",
+    "dependencies": [
+        "proxygen"
+    ],
+    "builtin-baseline": "0c94afc7883faee9f188c36232d628ffa94cf27f"
+}
