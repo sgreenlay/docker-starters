@@ -13,15 +13,13 @@ RUN apt-get install -y python3 gperf pkg-config zip unzip
 RUN mkdir /app
 WORKDIR /app
 
-ENV VCPKG_FEATURE_FLAGS="manifests,versions"
-
-COPY ./vcpkg.json  .
-RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ /vcpkg/vcpkg install
-
 ADD . .
 
 RUN mkdir /app/build
 WORKDIR /app/build
+
+ENV VCPKG_FEATURE_FLAGS="manifests,versions"
+
 RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ `/vcpkg/vcpkg fetch cmake` -DCMAKE_MAKE_PROGRAM=`/vcpkg/vcpkg fetch ninja` -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..
 RUN --mount=type=cache,target=/root/.cache/vcpkg/archives/ `/vcpkg/vcpkg fetch ninja`
 
